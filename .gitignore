@@ -1,0 +1,12 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.env
+# Service account (do NOT commit real credentials)
+server/config/serviceAccount.json
+# React Native typical ignores
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/ios/Pods/
+mobile/ios/build/
