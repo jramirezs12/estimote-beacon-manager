@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin - Enviar mensaje a iBeacon</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; max-width: 800px; }
+    label { display:block; margin:8px 0; }
+    input, textarea { width: 100%; max-width: 520px; padding: 6px; }
+    button { padding: 8px 12px; }
+    .row { display:flex; gap:12px; }
+    .col { flex:1; }
+    pre { background:#f6f8fa; padding:12px; overflow:auto; }
+  </style>
+</head>
+<body>
+  <h1>Enviar mensaje a beacon (iBeacon)</h1>
+  <p>Enviará push por FCM a dispositivos con presencia activa cerca de este beacon.</p>
+  <div>
+    <label>Servidor (API base URL): <input id="server" value="http://localhost:3000" /></label>
+    <label>UUID: <input id="uuid" value="AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE" /></label>
+    <div class="row">
+      <label class="col">Major: <input id="major" value="1" /></label>
+      <label class="col">Minor: <input id="minor" value="1" /></label>
+    </div>
+    <label>Título: <input id="title" placeholder="Título de la notificación" /></label>
+    <label>Mensaje: <textarea id="body" rows="3" placeholder="Texto del mensaje"></textarea></label>
+    <label>Data (JSON opcional): <textarea id="data" rows="3" placeholder='{"deeplink": "app://promo/123"}'></textarea></label>
+    <button id="send">Enviar</button>
+  </div>
+  <h3>Respuesta</h3>
+  <pre id="out"></pre>
+  <script>
+    const out = document.getElementById('out');
+    document.getElementById('send').addEventListener('click', async () => {
+      const base = document.getElementById('server').value;
+      const uuid = document.getElementById('uuid').value.trim();
+      const major = parseInt(document.getElementById('major').value, 10);
+      const minor = parseInt(document.getElementById('minor').value, 10);
+      const title = document.getElementById('title').value.trim();
+      const body = document.getElementById('body').value;
+      let data = {};
+      try {
+        const raw = document.getElementById('data').value.trim();
+        data = raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return out.textContent = 'Data JSON inválido';
+      }
+      try {
+        const resp = await fetch(`${base}/api/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uuid, major, minor, title, body, data })
+        });
+        const json = await resp.json();
+        out.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        out.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
